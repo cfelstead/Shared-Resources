@@ -83,7 +83,7 @@ Then ask the user directly what they want to do:
 
 ## On send-back
 
-Hand the full three-axis report to `cfd-implement` and tell it to enter revision mode. Do not attempt to fix anything here — this skill reviews, it doesn't edit code.
+`cfd-implement` cannot be launched by this skill or any other agent — it is reserved for explicit user invocation, so do not attempt to call or trigger it yourself. Instead, give the user a ready-to-run `/cfd-implement` prompt they can paste themselves: the ticket number, revision mode, the commit range this review covered, and the specific findings to address (quote them, don't make the user re-derive them from the report above). If the user only wants a subset of findings addressed, reflect that subset in the prompt, not the full report. Do not attempt to fix anything here — this skill reviews, it doesn't edit code.
 
 ## Handoff
 
