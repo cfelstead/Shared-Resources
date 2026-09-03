@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Talk.Core\Talk.Core.csproj" />
+    <ProjectReference Include="..\Step01Echo\Step01Echo.csproj" />
+    <ProjectReference Include="..\Step02StatelessLlm\Step02StatelessLlm.csproj" />
+    <ProjectReference Include="..\Step03ChatMemory\Step03ChatMemory.csproj" />
+    <ProjectReference Include="..\Step04NativeSkills\Step04NativeSkills.csproj" />
+    <ProjectReference Include="..\Step05KnowledgeCutoff\Step05KnowledgeCutoff.csproj" />
+    <ProjectReference Include="..\Step06_Rag\Step06_Rag.csproj" />
+    <ProjectReference Include="..\Step07Mcp\Step07Mcp.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Talk.Core/Talk.Core.csproj" />
+    <Project Path="src/Talk.Core.Tests/Talk.Core.Tests.csproj" />
+    <Project Path="src/Talk.Steps.Tests/Talk.Steps.Tests.csproj" />
+    <Project Path="src/Step01Echo/Step01Echo.csproj" />
+    <Project Path="src/Step02StatelessLlm/Step02StatelessLlm.csproj" />
+    <Project Path="src/Step03ChatMemory/Step03ChatMemory.csproj" />
+    <Project Path="src/Step04NativeSkills/Step04NativeSkills.csproj" />
+    <Project Path="src/Step05KnowledgeCutoff/Step05KnowledgeCutoff.csproj" />
+    <Project Path="src/Step06_Rag/Step06_Rag.csproj" />
+    <Project Path="src/Step07Mcp/Step07Mcp.csproj" />
+    <Project Path="src/McpSidecarServer/McpSidecarServer.csproj" />
+  </Folder>
+</Solution>

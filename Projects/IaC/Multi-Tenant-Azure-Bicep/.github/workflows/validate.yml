@@ -1,0 +1,42 @@
+name: Validate Infrastructure Changes
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Infra/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  what-if:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [prod, test]
+    env:
+      DEPLOYMENT_LOCATION: uksouth
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Microsoft Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: What-if (${{ matrix.environment }})
+        uses: azure/arm-deploy@v2
+        with:
+          scope: subscription
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          region: ${{ env.DEPLOYMENT_LOCATION }}
+          template: ./Infra/main.bicep
+          parameters: location=${{ env.DEPLOYMENT_LOCATION }} environmentName=${{ matrix.environment }} sqlEntraAdminLogin='${{ secrets.AZURE_SQL_ENTRA_ADMIN_LOGIN }}' sqlEntraAdminObjectId='${{ secrets.AZURE_SQL_ENTRA_ADMIN_OBJECT_ID }}'
+          deploymentMode: Incremental
+          additionalArguments: --what-if

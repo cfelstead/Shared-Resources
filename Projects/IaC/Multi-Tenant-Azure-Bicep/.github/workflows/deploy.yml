@@ -1,0 +1,83 @@
+# .github/workflows/deploy.yml
+name: Deploy SaaS Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+# Required permissions for OIDC Token creation
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  provision-infra:
+    runs-on: ubuntu-latest
+    env:
+      DEPLOYMENT_LOCATION: uksouth
+      ENVIRONMENT_NAME: prod
+      CUSTOMER_IDS: custalpha,custbeta
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Microsoft Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Bicep Resources
+        uses: azure/arm-deploy@v2
+        with:
+          scope: subscription
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          region: ${{ env.DEPLOYMENT_LOCATION }}
+          template: ./Infra/main.bicep
+          parameters: location=${{ env.DEPLOYMENT_LOCATION }} environmentName=${{ env.ENVIRONMENT_NAME }} sqlEntraAdminLogin='${{ secrets.AZURE_SQL_ENTRA_ADMIN_LOGIN }}' sqlEntraAdminObjectId='${{ secrets.AZURE_SQL_ENTRA_ADMIN_OBJECT_ID }}'
+          failOnStdErr: false
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish application artifacts
+        shell: bash
+        run: |
+          dotnet publish ProductsFunction/ProductsFunction.csproj -c Release -o artifacts/function
+          dotnet publish ProductsWeb/ProductsWeb.csproj -c Release -o artifacts/web
+          (cd artifacts/function && zip -r ../../function.zip .)
+          (cd artifacts/web && zip -r ../../web.zip .)
+
+      - name: Grant Function managed identity SQL access
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            IFS=',' read -ra IDS <<< "${CUSTOMER_IDS}"
+            for rawId in "${IDS[@]}"; do
+              id="$(echo "$rawId" | xargs)"
+              server="sql-${ENVIRONMENT_NAME}-${id}"
+              db="sqldb-products"
+              functionName="func-${ENVIRONMENT_NAME}-${id}"
+
+              sqlQuery="IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = N'${functionName}') BEGIN CREATE USER [${functionName}] FROM EXTERNAL PROVIDER; END; IF NOT EXISTS (SELECT 1 FROM sys.database_role_members drm JOIN sys.database_principals r ON drm.role_principal_id = r.principal_id JOIN sys.database_principals m ON drm.member_principal_id = m.principal_id WHERE r.name = N'db_datareader' AND m.name = N'${functionName}') BEGIN ALTER ROLE db_datareader ADD MEMBER [${functionName}]; END; IF NOT EXISTS (SELECT 1 FROM sys.database_role_members drm JOIN sys.database_principals r ON drm.role_principal_id = r.principal_id JOIN sys.database_principals m ON drm.member_principal_id = m.principal_id WHERE r.name = N'db_datawriter' AND m.name = N'${functionName}') BEGIN ALTER ROLE db_datawriter ADD MEMBER [${functionName}]; END;"
+
+              az sql db query --server "$server" --name "$db" --querytext "$sqlQuery"
+            done
+
+      - name: Deploy function and web code
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            IFS=',' read -ra IDS <<< "${CUSTOMER_IDS}"
+            for rawId in "${IDS[@]}"; do
+              id="$(echo "$rawId" | xargs)"
+              rg="rg-${ENVIRONMENT_NAME}-${id}"
+
+              az functionapp deployment source config-zip --resource-group "$rg" --name "func-${ENVIRONMENT_NAME}-${id}" --src function.zip
+              az webapp deploy --resource-group "$rg" --name "app-${ENVIRONMENT_NAME}-${id}" --src-path web.zip --type zip
+            done
