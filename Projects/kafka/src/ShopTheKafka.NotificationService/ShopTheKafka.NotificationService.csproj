@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-ShopTheKafka.NotificationService-181583e0-913e-4660-b862-d1b0e4ed0798</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Confluent.Kafka" Version="13.5.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ShopTheKafka.ServiceDefaults\ShopTheKafka.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.Contracts\ShopTheKafka.Contracts.csproj" />
+  </ItemGroup>
+</Project>

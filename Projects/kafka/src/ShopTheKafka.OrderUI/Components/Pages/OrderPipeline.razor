@@ -1,0 +1,64 @@
+@* UI-DECISIONS.md's Variant C: one kanban column per OrderStatus value, order form in a full-width bar above
+   the board, no navigation chrome - wired to the real OrderService/OrderStatusService HTTP + SignalR seam via
+   OrderBoardState (replaces the prototype's FakeOrderFeed entirely). *@
+@page "/"
+@rendermode InteractiveServer
+@using ShopTheKafka.OrderUI.Services
+@implements IAsyncDisposable
+@inject OrderBoardState Board
+
+<PageTitle>ShopTheKafka</PageTitle>
+
+<div class="order-pipeline">
+    <div class="order-pipeline__topbar">
+        <OrderForm OnPlace="HandlePlace" />
+    </div>
+
+    <div class="order-pipeline__board">
+        @foreach (var status in StatusDisplay.Columns)
+        {
+            <section class="order-pipeline__column">
+                <header style="border-top-color:@StatusDisplay.Color(status)">
+                    @StatusDisplay.Label(status)
+                    <span class="order-pipeline__count">@Board.GetByStatus(status).Count</span>
+                </header>
+                <div class="order-pipeline__cards">
+                    @foreach (var order in Board.GetByStatus(status))
+                    {
+                        <div class="order-pipeline__card">
+                            <div class="order-pipeline__card-id">@order.OrderId.ToString()[..8]</div>
+                            <div class="order-pipeline__card-items">@order.Items.Count item(s) — @order.TotalAmount.ToString("C")</div>
+                            @{
+                                var last = order.Timeline.Count > 0 ? order.Timeline[^1] : null;
+                            }
+                            @if (last?.Detail is not null)
+                            {
+                                <div class="order-pipeline__card-detail">@last.Detail</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</div>
+
+@code {
+    private readonly Guid _customerId = Guid.NewGuid();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Board.Changed += OnChanged;
+        await Board.ConnectAsync();
+    }
+
+    private async Task HandlePlace(List<OrderLineItem> items) => await Board.PlaceOrderAsync(_customerId, items);
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public ValueTask DisposeAsync()
+    {
+        Board.Changed -= OnChanged;
+        return ValueTask.CompletedTask;
+    }
+}

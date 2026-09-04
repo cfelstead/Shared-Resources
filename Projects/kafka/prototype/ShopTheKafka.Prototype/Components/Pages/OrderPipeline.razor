@@ -1,0 +1,63 @@
+@* Folded-in UI decision from cfd-prototype: Variant C (kanban board). See UI-DECISIONS.md.
+   Still prototype-quality (fake data, no real Kafka/SignalR) — to be rewritten in cfd-implement. *@
+@page "/"
+@rendermode InteractiveServer
+@using ShopTheKafka.Prototype.Prototype
+@implements IDisposable
+@inject FakeOrderFeed Feed
+
+<PageTitle>ShopTheKafka</PageTitle>
+
+<div class="order-pipeline">
+    <div class="order-pipeline__topbar">
+        <OrderForm OnPlace="HandlePlace" />
+    </div>
+
+    <div class="order-pipeline__board">
+        @foreach (var status in Columns)
+        {
+            <section class="order-pipeline__column">
+                <header style="border-top-color:@StatusDisplay.Color(status)">
+                    @StatusDisplay.Label(status)
+                    <span class="order-pipeline__count">@Feed.GetAll().Count(o => o.CurrentStatus == status)</span>
+                </header>
+                <div class="order-pipeline__cards">
+                    @foreach (var order in Feed.GetAll().Where(o => o.CurrentStatus == status))
+                    {
+                        <div class="order-pipeline__card">
+                            <div class="order-pipeline__card-id">@order.OrderId.ToString()[..8]</div>
+                            <div class="order-pipeline__card-items">@order.Items.Count item(s) — @order.TotalAmount.ToString("C")</div>
+                            @{
+                                var last = order.Timeline[^1];
+                            }
+                            @if (last.Detail is not null)
+                            {
+                                <div class="order-pipeline__card-detail">@last.Detail</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly OrderStatusValue[] Columns =
+    [
+        OrderStatusValue.Placed,
+        OrderStatusValue.PaymentApproved,
+        OrderStatusValue.PaymentFailed,
+        OrderStatusValue.InventoryReserved,
+        OrderStatusValue.InventoryBackorder,
+        OrderStatusValue.Shipped,
+    ];
+
+    protected override void OnInitialized() => Feed.Changed += OnChanged;
+
+    private void HandlePlace(List<Item> items) => Feed.PlaceOrder(items);
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => Feed.Changed -= OnChanged;
+}

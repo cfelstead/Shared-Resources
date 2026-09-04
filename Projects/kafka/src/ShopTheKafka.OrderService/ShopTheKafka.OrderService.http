@@ -1,0 +1,14 @@
+@ShopTheKafka.OrderService_HostAddress = http://localhost:5099
+
+POST {{ShopTheKafka.OrderService_HostAddress}}/orders
+Content-Type: application/json
+
+{
+  "customerId": "11111111-1111-1111-1111-111111111111",
+  "items": [
+    { "itemName": "Widget", "quantity": 2 },
+    { "itemName": "Gadget", "quantity": 1 }
+  ]
+}
+
+###

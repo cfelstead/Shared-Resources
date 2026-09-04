@@ -1,0 +1,26 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.5.3">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>2373d80f-3484-4d5a-8b75-1537ac2053da</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Kafka" Version="13.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ShopTheKafka.OrderService\ShopTheKafka.OrderService.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.PaymentService\ShopTheKafka.PaymentService.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.InventoryService\ShopTheKafka.InventoryService.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.ShippingService\ShopTheKafka.ShippingService.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.NotificationService\ShopTheKafka.NotificationService.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.OrderStatusService\ShopTheKafka.OrderStatusService.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.OrderUI\ShopTheKafka.OrderUI.csproj" />
+  </ItemGroup>
+
+</Project>

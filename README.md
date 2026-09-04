@@ -14,6 +14,11 @@ wants to run them, read the code, or follow along.
 
 - [Claude Skills](Projects/Claude-Skills) - Skills I am developing in order to keep control of the developments produced by Agentic coding. This approach ensures I fully understand the technology produced and can support it in the absence of AI and without delay.
 
+- [ShopTheKafka](Projects/kafka) - A hands-on demo of event-driven
+  microservices on .NET Aspire + Kafka: a full order pipeline built as six
+  small backend services connected by six Kafka topics, with a Blazor UI
+  that shows every order moving through the pipeline live.
+
 - [Multi-Tenant Azure Bicep](Projects/IaC/Multi-Tenant-Azure-Bicep) - A multi-tenant
   SaaS deployment on Azure using Bicep and GitHub Actions, provisioning an
   isolated set of resources per customer from a single parameterized

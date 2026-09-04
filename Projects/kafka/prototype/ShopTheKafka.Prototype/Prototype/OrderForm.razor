@@ -1,0 +1,49 @@
+@* Shared order-placement form — a small shared control, not shared layout. Each variant places/styles it differently. *@
+
+<div class="order-form">
+    <div class="order-form__row">
+        <select @bind="_itemName">
+            @foreach (var name in ItemNames)
+            {
+                <option value="@name">@name</option>
+            }
+        </select>
+        <input type="number" min="1" max="9" @bind="_quantity" />
+        <button type="button" @onclick="AddLine">Add item</button>
+    </div>
+
+    @if (_lines.Count > 0)
+    {
+        <ul class="order-form__lines">
+            @foreach (var line in _lines)
+            {
+                <li>@line.Quantity × @line.ItemName (@line.UnitPrice.ToString("C") each)</li>
+            }
+        </ul>
+        <button type="button" class="order-form__submit" @onclick="Submit">Place order (@_lines.Sum(l => l.Quantity * l.UnitPrice).ToString("C"))</button>
+    }
+</div>
+
+@code {
+    private static readonly string[] ItemNames = ["Widget", "Gadget", "Gizmo", "Doohickey", "Thingamajig"];
+    private static readonly Random Random = new();
+
+    [Parameter, EditorRequired] public EventCallback<List<Item>> OnPlace { get; set; }
+
+    private string _itemName = ItemNames[0];
+    private int _quantity = 1;
+    private readonly List<Item> _lines = [];
+
+    private void AddLine()
+    {
+        var price = Math.Round((decimal)(Random.NextDouble() * 40 + 5), 2);
+        _lines.Add(new Item(_itemName, _quantity, price));
+        _quantity = 1;
+    }
+
+    private async Task Submit()
+    {
+        await OnPlace.InvokeAsync([.. _lines]);
+        _lines.Clear();
+    }
+}

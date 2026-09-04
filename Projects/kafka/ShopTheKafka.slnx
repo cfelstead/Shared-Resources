@@ -1,0 +1,26 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ShopTheKafka.AppHost/ShopTheKafka.AppHost.csproj" />
+    <Project Path="src/ShopTheKafka.Contracts/ShopTheKafka.Contracts.csproj" />
+    <Project Path="src/ShopTheKafka.InventoryService/ShopTheKafka.InventoryService.csproj" />
+    <Project Path="src/ShopTheKafka.NotificationService/ShopTheKafka.NotificationService.csproj" />
+    <Project Path="src/ShopTheKafka.OrderService/ShopTheKafka.OrderService.csproj" />
+    <Project Path="src/ShopTheKafka.OrderStatusService/ShopTheKafka.OrderStatusService.csproj" />
+    <Project Path="src/ShopTheKafka.OrderUI/ShopTheKafka.OrderUI.csproj" />
+    <Project Path="src/ShopTheKafka.PaymentService/ShopTheKafka.PaymentService.csproj" />
+    <Project Path="src/ShopTheKafka.ServiceDefaults/ShopTheKafka.ServiceDefaults.csproj" />
+    <Project Path="src/ShopTheKafka.ShippingService/ShopTheKafka.ShippingService.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ShopTheKafka.Contracts.Tests/ShopTheKafka.Contracts.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.EndToEnd.Tests/ShopTheKafka.EndToEnd.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.InventoryService.Tests/ShopTheKafka.InventoryService.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.KafkaTestSupport/ShopTheKafka.KafkaTestSupport.csproj" />
+    <Project Path="tests/ShopTheKafka.NotificationService.Tests/ShopTheKafka.NotificationService.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.OrderService.Tests/ShopTheKafka.OrderService.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.OrderStatusService.Tests/ShopTheKafka.OrderStatusService.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.OrderUI.Tests/ShopTheKafka.OrderUI.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.PaymentService.Tests/ShopTheKafka.PaymentService.Tests.csproj" />
+    <Project Path="tests/ShopTheKafka.ShippingService.Tests/ShopTheKafka.ShippingService.Tests.csproj" />
+  </Folder>
+</Solution>

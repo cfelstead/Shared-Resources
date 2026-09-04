@@ -1,0 +1,61 @@
+@* Order-placement form: a full-width bar above the board, per UI-DECISIONS.md's Variant C. *@
+@using ShopTheKafka.OrderUI.Services
+
+<div class="order-form">
+    <div class="order-form__row">
+        <select @bind="_itemName">
+            @foreach (var name in ItemNames)
+            {
+                <option value="@name">@name</option>
+            }
+        </select>
+        <input type="number" min="1" max="9" @bind="_quantity" />
+        <button type="button" @onclick="AddLine">Add item</button>
+    </div>
+
+    @if (_lines.Count > 0)
+    {
+        <ul class="order-form__lines">
+            @foreach (var line in _lines)
+            {
+                <li>@line.Quantity × @line.ItemName</li>
+            }
+        </ul>
+        <button type="button" class="order-form__submit" disabled="@_submitting" @onclick="Submit">
+            @(_submitting ? "Placing order..." : "Place order")
+        </button>
+    }
+</div>
+
+@code {
+    // Mirrors OrderService's Catalog item names (SCHEMA.md's Item) - pricing is server-authoritative, so this
+    // form never invents a price, only the item name/quantity lines OrderService's POST /orders expects.
+    private static readonly string[] ItemNames = ["Widget", "Gadget", "Gizmo", "Doohickey", "Thingamajig"];
+
+    [Parameter, EditorRequired] public EventCallback<List<OrderLineItem>> OnPlace { get; set; }
+
+    private string _itemName = ItemNames[0];
+    private int _quantity = 1;
+    private readonly List<OrderLineItem> _lines = [];
+    private bool _submitting;
+
+    private void AddLine()
+    {
+        _lines.Add(new OrderLineItem(_itemName, _quantity));
+        _quantity = 1;
+    }
+
+    private async Task Submit()
+    {
+        _submitting = true;
+        try
+        {
+            await OnPlace.InvokeAsync([.. _lines]);
+            _lines.Clear();
+        }
+        finally
+        {
+            _submitting = false;
+        }
+    }
+}

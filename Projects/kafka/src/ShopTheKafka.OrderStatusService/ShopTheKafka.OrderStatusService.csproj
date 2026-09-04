@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-ShopTheKafka.OrderStatusService-5ce07591-c623-4531-977e-48ea99319cc5</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Confluent.Kafka" Version="13.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ShopTheKafka.ServiceDefaults\ShopTheKafka.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\ShopTheKafka.Contracts\ShopTheKafka.Contracts.csproj" />
+  </ItemGroup>
+</Project>
