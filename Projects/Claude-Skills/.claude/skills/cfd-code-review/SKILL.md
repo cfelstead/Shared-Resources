@@ -20,13 +20,19 @@ The user, after reading the report, does one of:
 
 ## Pinning the fixed point
 
-The diff under review is the ticket's own commits, not the whole branch. Find them via the ticket number referenced in commit messages (`cfd-implement` requires this):
+The diff under review is the ticket's own commits, not the whole branch. Every ticket is implemented in its own worktree, on its own `ticket/<NN>-<slug>` branch (see `cfd-implement`'s "Every ticket gets its own worktree") — run this skill inside that same worktree.
+
+Pin the diff against the integration branch the ticket's branch forked from: `git diff <integration-branch>...HEAD` (three-dot, against the merge-base). That range is exactly this ticket's work by construction — no grep needed, and it stays correct across revision-mode passes since new commits just extend the same range.
+
+If for some reason the ticket isn't in its own worktree (an older ticket, or the user deliberately worked on a shared branch), fall back to finding the commits via the ticket number referenced in commit messages:
 
 ```
 git log --grep="<ticket-number>" --oneline
 ```
 
-Confirm the resulting commit range with the user if it's ambiguous (e.g. the ticket number appears in unrelated commits, or this is a second review pass after revision-mode fixes and only the new commits should be in scope). Capture the diff command once: `git diff <base>...HEAD` (three-dot, against the merge-base) for the confirmed range. Fail here — not inside three parallel sub-agents — if the range doesn't resolve or the diff is empty.
+Confirm the resulting commit range with the user if it's ambiguous (e.g. the ticket number appears in unrelated commits). Capture the diff command once: `git diff <base>...HEAD` (three-dot, against the merge-base) for the confirmed range.
+
+Fail here — not inside three parallel sub-agents — if the range doesn't resolve or the diff is empty.
 
 ## Identifying the sources
 
@@ -79,11 +85,12 @@ Then ask the user directly what they want to do:
 
 1. Set the ticket's status to `done` in its ticket file.
 2. If the project uses GitHub (a remote points at github.com, or the user says so), offer to open a pull request for this ticket's commits — do not push or open the PR without the user confirming, per normal git-safety practice.
-3. Report the frontier of remaining tickets so the user can decide what's next.
+3. Offer to merge the ticket branch back into the integration branch (or note that the PR from step 2 will do this instead) and to remove the worktree (`git worktree remove`) once merged — do not merge, push, or remove the worktree without the user confirming, per normal git-safety practice. Leave other tickets' worktrees untouched; syncing them against the now-updated integration branch is the user's call, not this skill's.
+4. Report the frontier of remaining tickets so the user can decide what's next.
 
 ## On send-back
 
-`cfd-implement` cannot be launched by this skill or any other agent — it is reserved for explicit user invocation, so do not attempt to call or trigger it yourself. Instead, give the user a ready-to-run `/cfd-implement` prompt they can paste themselves: the ticket number, revision mode, the commit range this review covered, and the specific findings to address (quote them, don't make the user re-derive them from the report above). If the user only wants a subset of findings addressed, reflect that subset in the prompt, not the full report. Do not attempt to fix anything here — this skill reviews, it doesn't edit code.
+`cfd-implement` cannot be launched by this skill or any other agent — it is reserved for explicit user invocation, so do not attempt to call or trigger it yourself. Instead, give the user a ready-to-run `/cfd-implement` prompt they can paste themselves: the ticket number, revision mode, which worktree to run it in, the commit range this review covered, and the specific findings to address (quote them, don't make the user re-derive them from the report above). If the user only wants a subset of findings addressed, reflect that subset in the prompt, not the full report. Do not attempt to fix anything here — this skill reviews, it doesn't edit code.
 
 ## Handoff
 

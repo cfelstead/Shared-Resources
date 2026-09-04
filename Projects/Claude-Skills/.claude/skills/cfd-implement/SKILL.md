@@ -10,7 +10,7 @@ This is where the schema, UI, and spec decisions from earlier steps actually bec
 
 This skill produces:
 
-- **A working implementation of one ticket**, committed to the current branch
+- **A working implementation of one ticket**, committed to that ticket's own branch, in that ticket's own worktree
 - **Tests written before the code they verify**, at the seam the ticket declares, satisfying every acceptance criterion
 - The ticket file with its acceptance criteria **checked off**
 - A hand-off to `cfd-code-review`
@@ -31,7 +31,25 @@ If the ticket's schema or UI touchpoints don't match what's currently in `SCHEMA
 
 ## Picking a ticket
 
-Work the **frontier** of `tickets/`: any ticket whose "Blocked by" tickets are all complete. Implement one ticket per run of this skill — don't pull the next ticket in until this one is committed and handed to review. If the user hasn't specified which ticket, list the current frontier and ask.
+Work the **frontier** of `tickets/`: any ticket whose "Blocked by" tickets are all complete. Implement one ticket per run of this skill — don't pull the next ticket in until this one is committed and handed to review (this restriction is per-worktree, not global; see below). If the user hasn't specified which ticket, list the **entire** current frontier and ask — not just one suggestion — since any of them could be started in its own worktree right away, including in parallel with others.
+
+## Every ticket gets its own worktree
+
+This is not optional or parallel-only — do it even when only one ticket is in flight, because this instance of the skill has no way to know whether another ticket is about to be started elsewhere. Isolating every ticket by worktree from the start means there's never a moment where two tickets could collide on a shared branch.
+
+- **Branch and worktree per ticket, before writing any code.** Create `ticket/<NN>-<slug>` off the integration branch (the branch tickets are implemented against — usually the feature/epic branch or `main`), and check it out into its own worktree directory (e.g. `../<repo>-ticket-<NN>/`):
+
+  ```
+  git worktree add ../<repo>-ticket-<NN> -b ticket/<NN>-<slug> <integration-branch>
+  ```
+
+  If a worktree for this ticket already exists (e.g. resuming after a break, or entering revision mode), reuse it rather than creating a new one.
+
+- **Run this skill inside that worktree.** All reads (`SCHEMA.md`, `UI-DECISIONS.md`, `CONTEXT.md`, `SPEC.md`, the ticket file) and all commits happen inside the ticket's own worktree, on the ticket's own branch.
+- **"The current branch" throughout this skill means the ticket's branch**, inside the ticket's worktree.
+- **Ticket files don't conflict.** Each ticket only edits its own file under `tickets/`, so branches editing different ticket files merge cleanly. Don't edit another ticket's file from inside this one's worktree.
+- **Staleness is the user's call, not this skill's.** If a ticket's worktree has been open a while and other tickets have merged into the integration branch in the meantime, this skill doesn't auto-rebase — flag it if the diff looks like it might conflict, but let the user decide when to sync (`git rebase <integration-branch>` or `git merge <integration-branch>` inside the worktree).
+- **Hand off per-worktree.** Each ticket hands off to `cfd-code-review` independently once committed — review happens inside the same worktree, against that ticket's branch.
 
 ## Test-driven implementation
 
@@ -78,8 +96,8 @@ Implementing a ticket does not close it — only the user, acting on a `cfd-code
 
 1. Confirm every acceptance criterion on the ticket is backed by a passing test at the declared seam, and that the coverage bar above is met or any shortfall has been explicitly surfaced to the user.
 2. Update the ticket file: tick the completed checkboxes, and set its status to `in-review` (not `done` or `closed`).
-3. Commit the work to the current branch. Reference the ticket number in the commit message.
-4. Hand off to `cfd-code-review` for this ticket's diff. Do not start the next ticket until this one has been accepted by the user or the user explicitly says to move on regardless.
+3. Commit the work to the ticket's own branch, in its own worktree (see **Every ticket gets its own worktree** above). Reference the ticket number in the commit message.
+4. Hand off to `cfd-code-review` for this ticket's diff. Do not start the next ticket in *this* worktree until this one has been accepted by the user or the user explicitly says to move on regardless — this restriction is per-worktree, not global: a different ticket running in its own worktree elsewhere is unaffected.
 
 ## Revision mode (after code review)
 
